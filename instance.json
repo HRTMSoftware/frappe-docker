@@ -18,6 +18,9 @@
   },
   "app_sources": {
     "hrms": "https://github.com/frappe/hrms.git",
-    "hrtmpay": "/home/frappe/frappe-v16-bench/apps/hrtmpay"
+    "hrtmpay": {
+      "repository": "https://github.com/renniemaharaj/frappe",
+      "token_env": "GITHUB_TOKEN_HRTMPAY"
+    }
   }
 }

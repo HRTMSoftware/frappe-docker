@@ -15,8 +15,19 @@ func (b *Bench) GetApp(app string) error {
 	if pinnedRef := b.AppRefs[app]; pinnedRef != "" {
 		ref = pinnedRef
 	}
-	if source := b.AppSources[app]; source != "" {
-		return b.ExecRunInBenchPrintIO("bench", "get-app", "--branch", ref, source)
+	if source, ok := b.AppSources[app]; ok && source.Repository != "" {
+		if source.TokenEnv == "" {
+			return b.ExecRunInBenchPrintIO("bench", "get-app", "--branch", ref, source.Repository)
+		}
+		token, exists := os.LookupEnv(source.TokenEnv)
+		if !exists || token == "" {
+			return fmt.Errorf("app %s requires environment variable %s to be set", app, source.TokenEnv)
+		}
+		gitEnv, err := gitURLRewriteEnv(source.Repository, token)
+		if err != nil {
+			return fmt.Errorf("configure authenticated source for app %s: %w", app, err)
+		}
+		return b.ExecRunInBenchPrintIOWithEnv(gitEnv, "bench", "get-app", "--branch", ref, source.Repository)
 	}
 	// First attempt: try to get by name directly
 	if err := b.ExecRunInBenchPrintIO("bench", "get-app", "--branch", ref, app); err == nil {

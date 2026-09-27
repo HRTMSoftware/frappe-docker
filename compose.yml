@@ -14,6 +14,8 @@ services:
       MARIADB_PASSWORD: frappe
       MARIADB_DATABASE: frappe
       FRAPPE_ADMIN_PASSWORD: ${FRAPPE_ADMIN_PASSWORD:?Set FRAPPE_ADMIN_PASSWORD in .env}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      GITHUB_TOKEN_HRTMPAY: ${GITHUB_TOKEN_HRTMPAY:-}
       # SSH key-based authentication (set via env or .env file)
       SSH_PUBLIC_KEY: ${SSH_PUBLIC_KEY:-}
     restart: always

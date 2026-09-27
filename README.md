@@ -74,7 +74,13 @@ The entrypoint (Go or shell) handles site management automatically:
     "frappe_bench": "frappe-v16-bench",
     "frappe_branch": "v16.35.0",
     "app_refs": {"erpnext": "v16.36.0", "hrms": "version-16", "hrtmpay": "main"},
-    "app_sources": {"hrms": "https://github.com/frappe/hrms.git", "hrtmpay": "/home/frappe/frappe-v16-bench/apps/hrtmpay"}
+    "app_sources": {
+        "hrms": "https://github.com/frappe/hrms.git",
+        "hrtmpay": {
+            "repository": "https://github.com/example/hrtmpay.git",
+            "token_env": "GITHUB_TOKEN"
+        }
+    }
 }
 ```
 
@@ -84,7 +90,8 @@ The entrypoint (Go or shell) handles site management automatically:
 * `frappe_bench`: Bench directory under `/home/frappe`; use a new name for a fresh site.
 * `frappe_branch`: branch or tag used by `bench init` and as the default for `bench get-app`.
 * `app_refs`: optional app-specific branch or tag overrides for `bench get-app`.
-* `app_sources`: optional Git repository URLs or local checkout paths for apps outside the default Frappe organization. HrtmPay lives directly in `mount/frappe-v16-bench/apps/hrtmpay`; keep `hrms` before `hrtmpay` in `instance_sites[].apps`.
+* `app_sources`: optional Git repository URLs or local checkout paths for apps outside the default Frappe organization. A source can be a string or an object with `repository` and optional `token_env`; the named environment variable supplies a GitHub token for HTTPS clones. Keep `hrms` before `hrtmpay` in `instance_sites[].apps`.
+* Add the variable named by `token_env` to your `.env` file (for example, `GITHUB_TOKEN_HRTMPAY`) so Compose passes it to the Frappe container.
 
 ### Example `common_site_config.json` (repo root)
 
