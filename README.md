@@ -1,5 +1,7 @@
 # Frappe Docker Compose Setup
 
+![Frappe Framework explained: an open-source framework for custom business applications, including ERP, CRM, HRMS, and e-commerce.](docs/images/frappe-framework-explained.png)
+
 ## Overview
 
 This Docker Compose project sets up a full **Frappe development environment** with automatic app management. You can choose between two implementations:
@@ -226,3 +228,7 @@ bench --site frontend migrate
 * `mysqldata`: MariaDB persistent storage
 * `redis-cache`, `redis-queue`, `redis-socketio`: Redis persistent storage
 * `mount`: Frappe workspace mount for local edits
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
