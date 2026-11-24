@@ -19,7 +19,7 @@
   "app_sources": {
     "hrms": "https://github.com/frappe/hrms.git",
     "hrtmpay": {
-      "repository": "https://github.com/renniemaharaj/frappe",
+      "repository": "https://github.com/renniemaharaj/hrtmpay.git",
       "token_env": "GITHUB_TOKEN_HRTMPAY"
     }
   }
