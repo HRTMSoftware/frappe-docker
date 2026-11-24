@@ -1,6 +1,6 @@
 # Frappe browser MCP
 
-This local stdio server drives `home.localhost` with Playwright. It offers login, navigation, page controls, Frappe form inspection, bounded diagnostics, and private file transfer. Tool definitions live in `src/tools.ts`, `src/browser-extras.ts`, and `src/frappe-tools.ts`; the catalog in `../aug/tools.json` is generated from MCP `tools/list`.
+This local stdio server drives `home.localhost` with Playwright and provides Frappe API, payroll preview, app operations, and tool-usage tools. It offers login, navigation, page controls, Frappe form inspection, bounded diagnostics, and private file transfer. Tool definitions live in `src/`; the catalog in `../aug/tools.json` is generated from MCP `tools/list`.
 
 ```bash
 cd mcp
@@ -12,6 +12,6 @@ npm run smoke
 
 The workspace-scoped `.vscode/mcp.json` registers `dist/server.js` with VS Code; `.codex/config.toml` also starts it for Codex. Build the server with `npm ci && npm run build` from `mcp/`, then start or restart the MCP connection. `FRAPPE_UI_BASE_URL` defaults to `http://home.localhost`; `FRAPPE_UI_USERNAME` defaults to `Administrator`. Set `FRAPPE_UI_PASSWORD` to override the root `.env` value of `FRAPPE_ADMIN_PASSWORD`. `FRAPPE_UI_HEADLESS=false` shows the browser, and `FRAPPE_UI_BROWSER` overrides `/usr/bin/chromium`.
 
-Browser state is saved under ignored `mcp/.state/` with mode `0600`. Rebuild and run `npm run catalog` after changing tools, then update `aug/browser.json` and its guide. The control MCP server planned in `plan.md` will remain a separate process.
+Browser state is saved under ignored `mcp/.state/` with mode `0600`. Rebuild and run `npm run catalog` after changing tools, then update the corresponding feature manifest and guide. App-operation tools require the MCP process user to have Docker daemon access; see `aug/app-ops.md`.
 
 Tool calls are recorded in `mcp/.state/tool-usage.jsonl` as private JSONL events, including tool name, call ID, timestamp, outcome, duration, and estimated model-token impact. Estimated counts use argument/result text length (roughly four characters per token) and a 1,000-token proxy per image; they are not provider billing counts. Failed calls include a truncated error summary with the configured password redacted; tool arguments and results are not logged. Tool descriptions include typical token estimates and relative scores so the model can compare likely context cost before a call. Run `npm run build`, then `npm run watch:tools` in a second terminal to see live usage counts, outcomes, average estimated tokens, and a comparison bar chart. The `tool_usage_overview` MCP tool gives the model a 24-hour usage summary by default; pass `hours` to change the window. It recommends focused reads and lower result limits when those answer the question. Tool-definition/schema overhead is not assigned to individual calls. Set `FRAPPE_TOOL_USAGE_LOG` to use a different register path; the watcher also accepts an optional path argument.

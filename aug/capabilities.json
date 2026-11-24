@@ -9,13 +9,16 @@
     "observability": "aug/observability.md",
     "frappe_ui": "aug/frappe-ui.md",
     "frappe_api": "aug/frappe-api.md",
+    "app_ops": "aug/app-ops.md",
     "payroll": "aug/payroll.md"
   },
   "features": {
     "browser": "aug/browser.json",
     "observability": "aug/observability.json",
     "frappe_ui": "aug/frappe-ui.json",
-    "frappe_api": "aug/frappe-api.json"
+    "frappe_api": "aug/frappe-api.json",
+    "app_ops": "aug/app-ops.json",
+    "payroll": "aug/payroll.json"
   },
   "knowledge_root": "aug/frappe"
 }

@@ -1,0 +1,15 @@
+{
+  "feature": "app_ops",
+  "guide": "aug/app-ops.md",
+  "tools": [
+    "frappe_app_status",
+    "frappe_migrate_site",
+    "frappe_reload_workers"
+  ],
+  "healthy_signals": [
+    "frappe_app_status reports the deployment mode, configured sites, and Frappe container status",
+    "frappe_migrate_site completes for an explicitly confirmed configured site",
+    "frappe_reload_workers completes and reports the runtime restart command"
+  ],
+  "restart_requirement": "Docker Compose access is required for the MCP process. Restart the MCP connection when server tools change."
+}

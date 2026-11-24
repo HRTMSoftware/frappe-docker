@@ -9,6 +9,7 @@ export const frappeApiPhases = {
   frappe_submit_doc: "interact",
   frappe_cancel_doc: "interact",
   frappe_call:       "interact",
+  hrtmpay_calculate_payroll: "observe",
 } as const;
 
 interface ApiSession {
@@ -234,4 +235,84 @@ export function registerFrappeApiTools(server: McpServer, config: BrowserConfig)
       }) as Record<string, unknown>;
       return res;
     })));
+
+  server.registerTool("hrtmpay_calculate_payroll", {
+    title: "HrtmPay: calculate payroll preview",
+    description:
+      "Run HrtmPay's side effect free payroll preview for an employee or explicit test case. " +
+      "When employee is supplied, load submitted year-to-date payroll totals and use the employee's effective PAYE engine and allowance. " +
+      "Without employee, provide engine and date_of_birth (unless only_pension_income is true) to reproduce an edge case. " +
+      "Returns NIS, HSG, PAYE, net pay, effective NIS table breakdown, and statutory rules applied. Does not create or update payroll documents.",
+    inputSchema: {
+      gross: z.number().nonnegative().describe("Gross earnings for this payroll period"),
+      frequency: z.enum(["weekly", "fortnightly", "monthly", "bimonthly"]),
+      period_start: z.string().date(),
+      period_end: z.string().date(),
+      employee: z.string().min(1).optional().describe("Employee ID; loads YTD history, date of birth, allowance, and assigned PAYE engine"),
+      engine: z.string().min(1).optional().describe("PAYE engine key from HrtmPay; validation is handled by HrtmPay"),
+      date_of_birth: z.string().date().optional(),
+      only_pension_income: z.boolean().optional(),
+      annual_personal_allowance: z.number().nonnegative().optional(),
+      ytd_gross: z.number().nonnegative().optional(),
+      ytd_nis: z.number().nonnegative().optional(),
+      ytd_hsg: z.number().nonnegative().optional(),
+      ytd_paye_withheld: z.number().nonnegative().optional(),
+      period_index: z.number().int().min(1).optional(),
+      cleanup: z.boolean().optional(),
+    },
+    annotations: { readOnlyHint: true, openWorldHint: false },
+  }, async input => json(await withSession(async s => {
+    let employeeData: Record<string, unknown> | undefined;
+    if (input.employee) {
+      const response = await frappeRequest(config, s, "/api/method/hrtmpay.api.get_calculator_employee_data", {
+        method: "POST",
+        body: {
+          employee: input.employee,
+          period_start: input.period_start,
+          period_end: input.period_end,
+        },
+      }) as Record<string, unknown>;
+      employeeData = response.message as Record<string, unknown>;
+    } else if (!input.engine) {
+      throw new Error("engine is required when employee is not supplied");
+    }
+
+    const ytd = (employeeData?.ytd ?? {}) as Record<string, unknown>;
+    const response = await frappeRequest(config, s, "/api/method/hrtmpay.api.calculate_preview", {
+      method: "POST",
+      body: {
+        gross: input.gross,
+        frequency: input.frequency,
+        period_start: input.period_start,
+        period_end: input.period_end,
+        employee: input.employee,
+        engine: input.engine ?? employeeData?.paye_engine,
+        date_of_birth: input.date_of_birth ?? employeeData?.date_of_birth,
+        only_pension_income: input.only_pension_income ?? employeeData?.only_pension_income ?? 0,
+        annual_personal_allowance: input.annual_personal_allowance ?? employeeData?.assigned_allowance_total ?? 0,
+        ytd_gross: input.ytd_gross ?? ytd.gross ?? 0,
+        ytd_nis: input.ytd_nis ?? ytd.nis ?? 0,
+        ytd_hsg: input.ytd_hsg ?? ytd.hsg ?? 0,
+        ytd_paye_withheld: input.ytd_paye_withheld ?? ytd.paye ?? 0,
+        period_index: input.period_index ?? employeeData?.period_index ?? 1,
+        cleanup: input.cleanup ?? 0,
+      },
+    }) as Record<string, unknown>;
+    return {
+      calculation: response.message,
+      employee_context: employeeData ? {
+        employee: employeeData.employee,
+        paye_engine: employeeData.paye_engine,
+        paye_engine_assignment: employeeData.paye_engine_assignment,
+        paye_engine_is_default: employeeData.paye_engine_is_default,
+        assigned_allowance_total: employeeData.assigned_allowance_total,
+        allowance_assignments: employeeData.allowance_assignments,
+        ytd: employeeData.ytd,
+        prior_slip_count: employeeData.prior_slip_count,
+        period_index: employeeData.period_index,
+      } : null,
+      compliance_score: null,
+      compliance_score_note: "HrtmPay does not currently calculate a numeric compliance score; use the returned statutory rules, effective tables, and audit details to assess the case.",
+    };
+  })));
 }

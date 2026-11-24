@@ -1397,6 +1397,185 @@
       "phase": "interact"
     },
     {
+      "name": "hrtmpay_calculate_payroll",
+      "title": "HrtmPay: calculate payroll preview",
+      "description": "Run HrtmPay's side effect free payroll preview for an employee or explicit test case. When employee is supplied, load submitted year-to-date payroll totals and use the employee's effective PAYE engine and allowance. Without employee, provide engine and date_of_birth (unless only_pension_income is true) to reproduce an edge case. Returns NIS, HSG, PAYE, net pay, effective NIS table breakdown, and statutory rules applied. Does not create or update payroll documents.\n\nEstimated model token impact: about 1000 tokens per typical call; relative score 10 (1 is cheapest). This is a rough argument and result size estimate. Large outputs and images can cost more. Tool-definition overhead is not included.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "gross": {
+            "description": "Gross earnings for this payroll period",
+            "type": "number",
+            "minimum": 0
+          },
+          "frequency": {
+            "type": "string",
+            "enum": [
+              "weekly",
+              "fortnightly",
+              "monthly",
+              "bimonthly"
+            ]
+          },
+          "period_start": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+          },
+          "period_end": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+          },
+          "employee": {
+            "description": "Employee ID; loads YTD history, date of birth, allowance, and assigned PAYE engine",
+            "type": "string",
+            "minLength": 1
+          },
+          "engine": {
+            "description": "PAYE engine key from HrtmPay; validation is handled by HrtmPay",
+            "type": "string",
+            "minLength": 1
+          },
+          "date_of_birth": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+          },
+          "only_pension_income": {
+            "type": "boolean"
+          },
+          "annual_personal_allowance": {
+            "type": "number",
+            "minimum": 0
+          },
+          "ytd_gross": {
+            "type": "number",
+            "minimum": 0
+          },
+          "ytd_nis": {
+            "type": "number",
+            "minimum": 0
+          },
+          "ytd_hsg": {
+            "type": "number",
+            "minimum": 0
+          },
+          "ytd_paye_withheld": {
+            "type": "number",
+            "minimum": 0
+          },
+          "period_index": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "cleanup": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "gross",
+          "frequency",
+          "period_start",
+          "period_end"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "feature": "payroll",
+      "phase": "observe"
+    },
+    {
+      "name": "frappe_app_status",
+      "title": "Frappe: app service status",
+      "description": "Read the configured Frappe deployment mode and site list, then report Docker Compose status for the Frappe service.\n\nEstimated model token impact: about 1000 tokens per typical call; relative score 10 (1 is cheapest). This is a rough argument and result size estimate. Large outputs and images can cost more. Tool-definition overhead is not included.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "feature": "app_ops",
+      "phase": "observe"
+    },
+    {
+      "name": "frappe_migrate_site",
+      "title": "Frappe: migrate configured site",
+      "description": "Run `bench --site <site> migrate` inside the Frappe service. This applies patches and schema changes to that site's database. Only sites listed in instance.json are accepted; pass confirm=true to execute.\n\nEstimated model token impact: about 1000 tokens per typical call; relative score 10 (1 is cheapest). This is a rough argument and result size estimate. Large outputs and images can cost more. Tool-definition overhead is not included.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "site": {
+            "description": "Exact site_name from instance.json",
+            "type": "string",
+            "minLength": 1
+          },
+          "confirm": {
+            "description": "Explicitly confirm running the site migration",
+            "type": "boolean",
+            "const": true
+          }
+        },
+        "required": [
+          "site",
+          "confirm"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "feature": "app_ops",
+      "phase": "operate"
+    },
+    {
+      "name": "frappe_reload_workers",
+      "title": "Frappe: reload workers",
+      "description": "Reload Python and worker code after changes. Production restarts the configured Supervisor web and worker groups, including web, Socket.IO, scheduler, and queue workers. Development restarts the Frappe container running `bench start`. This can briefly interrupt requests; pass confirm=true to execute.\n\nEstimated model token impact: about 1000 tokens per typical call; relative score 10 (1 is cheapest). This is a rough argument and result size estimate. Large outputs and images can cost more. Tool-definition overhead is not included.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirm": {
+            "description": "Explicitly confirm restarting the Frappe runtime",
+            "type": "boolean",
+            "const": true
+          }
+        },
+        "required": [
+          "confirm"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      },
+      "feature": "app_ops",
+      "phase": "operate"
+    },
+    {
       "name": "tool_usage_overview",
       "title": "Tool usage overview",
       "description": "Summarize recent MCP tool usage, success/failure outcomes, active calls, recent failures, most-used tools, and estimated model token impact. Per-tool estimates and observed payload token approximations are intended to help keep model context use lean.\n\nEstimated model token impact: about 1500 tokens per typical call; relative score 15 (1 is cheapest). This is a rough argument and result size estimate. Large outputs and images can cost more. Tool-definition overhead is not included.",

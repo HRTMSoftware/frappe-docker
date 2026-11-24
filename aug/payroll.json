@@ -1,0 +1,11 @@
+{
+  "feature": "payroll",
+  "guide": "aug/payroll.md",
+  "tools": [
+    "hrtmpay_calculate_payroll"
+  ],
+  "healthy_signals": [
+    "hrtmpay_calculate_payroll returns a calculation with rules_applied and NIS breakdown"
+  ],
+  "restart_requirement": "Restart the MCP client connection when server tools change."
+}

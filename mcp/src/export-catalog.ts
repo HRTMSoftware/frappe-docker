@@ -9,6 +9,7 @@ import { extraPhases } from "./browser-extras.js";
 import { frappePhases } from "./frappe-tools.js";
 import { frappeApiPhases } from "./frappe-api-tools.js";
 import { toolUsagePhases } from "./tool-usage-tool.js";
+import { appOpsPhases } from "./app-ops-tools.js";
 
 const mcpRoot = path.resolve(fileURLToPath(new URL("../", import.meta.url)));
 const target = path.join(projectRoot, "aug/tools.json");
@@ -23,7 +24,7 @@ try {
   await client.connect(transport);
   const { tools } = await client.listTools();
   const names = new Set(tools.map(tool => tool.name));
-  const phases = { ...toolPhases, ...extraPhases, ...frappePhases, ...frappeApiPhases, ...toolUsagePhases };
+  const phases = { ...toolPhases, ...extraPhases, ...frappePhases, ...frappeApiPhases, ...appOpsPhases, ...toolUsagePhases };
   const mapped = new Set(Object.keys(phases));
   if (names.size !== mapped.size || [...names].some(name => !mapped.has(name))) {
     throw new Error("Tool phase map differs from MCP tools/list");
@@ -46,7 +47,7 @@ try {
     server: "mcp/dist/server.js",
     tools: tools.map(tool => ({
       ...tool,
-      feature: tool.name in toolUsagePhases ? "observability" : tool.name in frappeApiPhases ? "frappe_api" : tool.name.startsWith("frappe_") ? "frappe_ui" : "browser",
+      feature: tool.name in toolUsagePhases ? "observability" : tool.name.startsWith("hrtmpay_") ? "payroll" : tool.name in appOpsPhases ? "app_ops" : tool.name in frappeApiPhases ? "frappe_api" : tool.name.startsWith("frappe_") ? "frappe_ui" : "browser",
       phase: phases[tool.name as keyof typeof phases],
     })),
   };
