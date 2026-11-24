@@ -93,6 +93,8 @@ The entrypoint (Go or shell) handles site management automatically:
 * `app_sources`: optional Git repository URLs or local checkout paths for apps outside the default Frappe organization. A source can be a string or an object with `repository` and optional `token_env`; the named environment variable supplies a GitHub token for HTTPS clones. Keep `hrms` before `hrtmpay` in `instance_sites[].apps`.
 * Add the variable named by `token_env` to your `.env` file (for example, `GITHUB_TOKEN_HRTMPAY`) so Compose passes it to the Frappe container.
 
+Bench exposes the default Frappe assets and the packaged HRTMPay wordmark under `/assets/`. HRTMPay uses the wordmark as its logo and favicon.
+
 ### Example `common_site_config.json` (repo root)
 
 ```json
